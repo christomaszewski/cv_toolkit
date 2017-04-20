@@ -1,3 +1,4 @@
 opencv-python>=3.1.0
 dill>=0.2.5
 imageio>=1.6
+yaml>=0.1.6

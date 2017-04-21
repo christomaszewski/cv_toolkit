@@ -46,19 +46,8 @@ class FisheyeCamera(yaml.YAMLObject):
 
 		self._newK = newK
 
-	def save(self, filename):
-		with open(filename, mode='w') as f:
-			yaml.dump(self, f)
-
-	def undistortImage(self, img, cropped=False):
-		map1, map2 = cv2.fisheye.initUndistortRectifyMap(self._K, self._D, np.eye(3),
-			self._newK, self._imgSize, cv2.CV_16SC2)
-
-		undistorted = cv2.remap(img, map1, map2,
-			interpolation=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT)
-
-		if (not cropped):
-			return undistorted
+		self._map1, self._map2 =cv2.fisheye.initUndistortRectifyMap(self._K, 
+			self._D, np.eye(3), self._newK, self._imgSize, cv2.CV_16SC2)
 
 		imgHeight, imgWidth = self._imgSize
 
@@ -66,18 +55,24 @@ class FisheyeCamera(yaml.YAMLObject):
 
 		pts = self.undistortPoints(corners)
 
-		x = int(min(pts[0,0], pts[1,0]))
-		y = int(min(pts[0,1], pts[2,1]))
-		r = int(max(pts[2,0], pts[3,0]))
-		b = int(max(pts[2,1], pts[3,1]))
+		self._left = int(min(pts[0,0], pts[1,0]))
+		self._top = int(min(pts[0,1], pts[2,1]))
+		self._right = int(max(pts[2,0], pts[3,0]))
+		self._bottom = int(max(pts[2,1], pts[3,1]))
 
-		print(pts)
-		print(x, y, r, b)
+	def save(self, filename):
+		with open(filename, mode='w') as f:
+			yaml.dump(self, f)
 
-		croppedImg = undistorted[y:b, x:r]
+	def undistortImage(self, img, cropped=False):
+		undistorted = cv2.remap(img, self._map1, self._map2,
+			interpolation=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT)
+
+		if (not cropped):
+			return undistorted
+
+		croppedImg = undistorted[self._top:self._bottom, self._left:self._right]
 		return croppedImg
-
-		#return croppedImg
 
 	def undistortPoints(self, points):
 		points = np.asarray(points)

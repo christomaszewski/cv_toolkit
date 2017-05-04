@@ -22,7 +22,7 @@ class Detector(metaclass=ABCMeta):
 
 class ShiTomasiDetector(Detector):
 
-	def __init__(self, maxCorners=100, qualityLevel=0.3, minDistance=5, blockSize=7):
+	def __init__(self, maxCorners=100, qualityLevel=0.9, minDistance=10, blockSize=7):
 		self._featureLimit = maxCorners
 		self._qualityLevel = qualityLevel
 		self._minDistance = minDistance
@@ -92,6 +92,12 @@ class GridDetector(Detector):
 
 		return np.float32(features).reshape(-1, 2)
 
+	def setGrid(self, gridDim):
+		self._gridDimensions = gridDim
+		self._numCells = gridDim[0] * gridDim[1]
+
+		self._featuresPerCell = int(self._featureLimit / self._numCells)
+		self._detector.featureLimit = self._featuresPerCell
 
 	@property
 	def featureLimit(self):

@@ -8,7 +8,7 @@ import numpy as np
 from queue import Queue
 from threading import Thread
 
-from cams import FisheyeCamera
+from .cams import FisheyeCamera
 
 class Dataset(yaml.YAMLObject):
 	""" Object representing a dataset
@@ -34,7 +34,7 @@ class Dataset(yaml.YAMLObject):
 
 			return data
 
-	def __init__(self, name, date, location, folder, start=0, end=0, cam=None):
+	def __init__(self, name, date, location, folder, start=0, end=0, fps=30, cam=None):
 		# Human Readable Dataset name
 		self._name = name
 
@@ -56,6 +56,10 @@ class Dataset(yaml.YAMLObject):
 
 		# Last frame of dataset
 		self._endFrame = end
+
+		# FPS of dataset
+		self._fps = fps
+		self._timestep = 1.0/fps
 
 		# Relative Path to camera calibration file for dataset
 		self._cameraFile = cam
@@ -99,7 +103,6 @@ class Dataset(yaml.YAMLObject):
 		return self._currFrameIndex < self._endFrame
 
 	def read(self):
-		print("reading image")
 		self._currFrameIndex += 1
 		return self._imgBuffer.get()
 
@@ -187,6 +190,9 @@ class Dataset(yaml.YAMLObject):
 
 		self._camera = cam
 
+	def currentTime(self):
+		return self._currFrameIndex * self._timestep
+
 
 	def test(self):
 		print(self._name, self._date, self._location)
@@ -203,7 +209,7 @@ class Dataset(yaml.YAMLObject):
 		"""
 		dict_rep = {'name':data._name, 'date':data._date, 'location':data._location,
 					'imgFolder':data._imgFolder, 'startFrame':data._startFrame,
-					'endFrame':data._endFrame, 'camera':data._cameraFile}
+					'endFrame':data._endFrame, 'fps':data._fps, 'camera':data._cameraFile}
 
 		print(dict_rep)
 
@@ -216,7 +222,7 @@ class Dataset(yaml.YAMLObject):
 		dict_rep = loader.construct_mapping(node)
 		print("Loading from yaml")
 		init_params = ['name', 'date', 'location', 'imgFolder', 
-						'startFrame', 'endFrame', 'camera']
+						'startFrame', 'endFrame', 'fps', 'camera']
 		params = [dict_rep[x] for x in init_params]
 		return cls(*params)
 

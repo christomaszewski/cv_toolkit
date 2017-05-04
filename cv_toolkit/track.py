@@ -42,7 +42,10 @@ class LKOpticalFlowTracker(object):
 		for (point, match) in zip(nextPoints.reshape(-1,2), matchQuality):
 			if (match):
 				trackedPoints.append(point)
+			else:
+				trackedPoints.append(None)
 			
 		self._prevImg = img
 
-		return np.float32(trackedPoints).reshape(-1, 2)
+		return trackedPoints
+		#np.float32(trackedPoints).reshape(-1, 2)

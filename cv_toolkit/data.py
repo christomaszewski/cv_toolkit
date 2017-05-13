@@ -123,7 +123,7 @@ class Dataset(yaml.YAMLObject):
 
 		self._frames = sorted(glob.glob(self._path + self._imgFolder + '/frame*.jpg'))
 
-		# Check if camer file is available
+		# Check if camera file is available
 		if (self._cameraFile is not None and os.path.exists(self._path + self._cameraFile)):
 			self._camera = FisheyeCamera.from_file(self._path + self._cameraFile)
 
@@ -152,7 +152,7 @@ class Dataset(yaml.YAMLObject):
 				img = cv2.imread(self._frames[self._bufferFrameIndex])
 
 				if (self._unwarp and self._camera is not None):
-					img = self._camera.undistortImage(img, cropped=True)
+					img = self._camera.undistortImage(img, cropped=False)
 
 				self._imgBuffer.put(img)
 
@@ -239,6 +239,10 @@ class Dataset(yaml.YAMLObject):
 	@property
 	def mask(self):
 		return self._mask
+
+	@property
+	def camera(self):
+		return self._camera
 
 	@property
 	def unwarp(self):

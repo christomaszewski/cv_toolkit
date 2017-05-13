@@ -2,7 +2,6 @@ import cv2
 import numpy as np
 
 drawing = False
-ix, iy = -1, -1
 size = 10
 imgShow = []
 
@@ -14,7 +13,6 @@ def click_handler(event, x, y, flags, param):
 	elif event is cv2.EVENT_LBUTTONUP:
 		drawing = False
 
-	ix, iy = x, y
 	if drawing:
 		cv2.circle(mask, (x, y), size, 255, -1)
 		cv2.circle(img, (x, y), size, (0, 0, 255), -1)

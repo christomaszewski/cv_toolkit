@@ -22,6 +22,9 @@ class FisheyeCamera(yaml.YAMLObject):
 	def __init__(self, K, D, imgSize, name=None, fmt=None):
 		self._K = np.asarray(K)
 		self._D = np.asarray(D)
+
+		#NOTE!!! Difference from OpenCV
+		# Image Size should be specified as (imgWidth, imgHeigh)
 		self._imgSize = tuple(imgSize)
 
 		self._name = name
@@ -34,22 +37,13 @@ class FisheyeCamera(yaml.YAMLObject):
 		self._D = np.asarray(self._D)
 		self._imgSize = tuple(self._imgSize)
 
-		print(self._imgSize)
+		imgWidth, imgHeight = self._imgSize
 
-		# Initialize new K matrix
-		newK = cv2.fisheye.estimateNewCameraMatrixForUndistortRectify(self._K,
-			self._D, self._imgSize, np.eye(3), balance=1.0, fov_scale=0.7)
+	
+		"""High Res Method - Not sure if its better
 
-		# Reset to center of image for now
-		newK[0,2] = self._imgSize[0] / 2
-		newK[1,2] = self._imgSize[1] / 2		
-
-		self._newK = newK
-
-		self._map1, self._map2 =cv2.fisheye.initUndistortRectifyMap(self._K, 
-			self._D, np.eye(3), self._newK, self._imgSize, cv2.CV_16SC2)
-
-		imgHeight, imgWidth = self._imgSize
+		# Compute new size of image by undistorting image corners
+		self._newK = np.copy(self._K)
 
 		corners = [[0,0], [0, imgHeight], [imgWidth, 0], [imgWidth, imgHeight]]
 
@@ -59,6 +53,25 @@ class FisheyeCamera(yaml.YAMLObject):
 		self._top = int(min(pts[0,1], pts[2,1]))
 		self._right = int(max(pts[2,0], pts[3,0]))
 		self._bottom = int(max(pts[2,1], pts[3,1]))
+
+		imgHeight = self._bottom - self._top
+		imgWidth = self._right - self._left
+
+		self._newK[1,2] = imgHeight / 2
+		self._newK[0,2] = imgWidth / 2
+
+		"""
+
+		# Initialize new K matrix, balance=1.0 to show entire
+		self._newK = cv2.fisheye.estimateNewCameraMatrixForUndistortRectify(self._K,
+			self._D, (imgWidth, imgHeight), R=np.eye(3), balance=1.0, fov_scale=1.0)
+
+		
+
+		self._map1, self._map2 = cv2.fisheye.initUndistortRectifyMap(self._K, 
+			self._D, np.eye(3), self._newK, (imgWidth, imgHeight), cv2.CV_16SC2)
+
+
 
 	def save(self, filename):
 		with open(filename, mode='w') as f:
@@ -84,7 +97,7 @@ class FisheyeCamera(yaml.YAMLObject):
 		undistorted = cv2.fisheye.undistortPoints(points.astype(np.float32), self._K, 
 			self._D, R=np.eye(3), P=self._newK)
 
-		return np.squeeze(undistorted)
+		return np.squeeze(undistorted).reshape(-1,2)
 
 	@classmethod
 	def to_yaml(cls, dumper, data):

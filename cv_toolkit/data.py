@@ -5,7 +5,6 @@ import cv2
 import os
 import numpy as np
 
-from queue import Queue
 from threading import Thread
 
 from .cams import FisheyeCamera
@@ -81,11 +80,11 @@ class Dataset(yaml.YAMLObject):
 		self._bufferThreadStopped = True
 
 		# Init image buffer
-		self._imgBuffer = Queue(maxsize=128)
+		#self._imgBuffer = Queue(maxsize=128)
 
 		# Setup buffering thread
-		self._bufferingThread = Thread(target=self._bufferUpdate, args=())
-		self._bufferingThread.daemon = True
+		#self._bufferingThread = Thread(target=self._bufferUpdate, args=())
+		#self._bufferingThread.daemon = True
 
 		# Set whether images should be unwarped
 		self._unwarp = False
@@ -104,7 +103,9 @@ class Dataset(yaml.YAMLObject):
 
 	def read(self):
 		self._currFrameIndex += 1
-		return self._imgBuffer.get()
+		return cv2.imread(self._frames[self._currFrameIndex-1])
+
+		#return self._imgBuffer.get()
 
 	def load(self):
 		""" Load bulky components of dataset
@@ -137,14 +138,14 @@ class Dataset(yaml.YAMLObject):
 			print("Warning: End frame beyond dataset bounds, setting to end of dataset")
 
 		# Start buffering threads
-		self._bufferThreadStopped = False
-		self._bufferingThread.start()
+		#self._bufferThreadStopped = False
+		#self._bufferingThread.start()
 
-
+	"""
 	def _bufferUpdate(self):
 		while True:
 			if (self._bufferThreadStopped):
-				return
+				break
 
 			if (not self._imgBuffer.full()):
 				# Load next image into buffer
@@ -165,7 +166,7 @@ class Dataset(yaml.YAMLObject):
 				#Do Nothing
 				pass
 				#print("buffer full")
-
+	"""
 	def construct(self, location, cam, start=0, end=None):
 		# Check if dataset location exists
 		if (not os.path.exists(location)):
@@ -243,11 +244,3 @@ class Dataset(yaml.YAMLObject):
 	@property
 	def camera(self):
 		return self._camera
-
-	@property
-	def unwarp(self):
-		return self._unwarp
-
-	@unwarp.setter
-	def unwarp(self, unwarpSetting):
-		self._unwarp = unwarpSetting

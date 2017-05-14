@@ -1,6 +1,5 @@
 import numpy as np
 import cv2
-from memory_profiler import profile
 
 class LKOpticalFlowTracker(object):
 
@@ -17,7 +16,6 @@ class LKOpticalFlowTracker(object):
 		self._params = dict(winSize = self._winSize, maxLevel = self._maxLevel,
 							criteria = self._criteria)
 
-	@profile
 	def trackPoints(self, points, img):
 		if (self._prevImg is None):
 			self._prevImg = img

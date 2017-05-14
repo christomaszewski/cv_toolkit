@@ -3,7 +3,6 @@ import cv2
 
 from primitives.keypoint import KeyPoint
 
-from memory_profiler import profile
 
 class KeyPointWrapper(object):
 
@@ -24,7 +23,6 @@ class SparseFeatureTracker(object):
 
 		return self._kp
 
-	@profile
 	def trackPoints(self, points, img, mask=None):
 		if (self._prevImg is None):
 			self._prevImg = img

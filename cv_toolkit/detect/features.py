@@ -18,11 +18,10 @@ class ShiTomasiDetector(Detector):
 
 		self._detector = cv2.goodFeaturesToTrack
 
-	from memory_profiler import profile
 	def detect(self, img, mask=None):
 		# Should store current mask for reuse?
 
-		return np.asarray(self._detector(img, mask=mask, **self._params))
+		return self._detector(img, mask=mask, **self._params)
 
 	@property
 	def featureLimit(self):

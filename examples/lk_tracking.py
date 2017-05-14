@@ -13,9 +13,6 @@ from cv_toolkit.track.flow import LKOpticalFlowTracker
 
 from cv_toolkit.transform.camera import UndistortionTransform
 
-from memory_profiler import profile
-
-@profile
 def mainFunc():
 	datasetFilename = "../../../datasets/llobregat_short.yaml"
 	data = Dataset.from_file(datasetFilename)
@@ -49,7 +46,7 @@ def mainFunc():
 
 		points = np.asarray([p for p in newPoints if p is not None])
 
-		if len(points) > 500:
+		if len(points) > 100:
 			uPoints = transformation.transformPoints(points)
 			for p in uPoints:
 				cv2.circle(undistortedImg, tuple(p), 3, (255, 0, 0), -1)

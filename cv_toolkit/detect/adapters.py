@@ -5,7 +5,6 @@ from .base import Detector
 
 from primitives.keypoint import KeyPoint
 
-from memory_profiler import profile
 
 class GridDetector(Detector):
 
@@ -28,7 +27,6 @@ class GridDetector(Detector):
 
 		self._detector.featureLimit = self._featuresPerCell
 
-	from memory_profiler import profile
 	def detect(self, img, mask):
 		heightStep = int((img.shape[0] - 2 * self._buffer) / self._gridDimensions[0])
 		widthStep = int((img.shape[1] - 2 * self._buffer) / self._gridDimensions[1])
@@ -93,7 +91,7 @@ class KeyPointGridDetector(GridDetector):
 
 		self._detector.featureLimit = self._featuresPerCell
 		"""
-	@profile
+
 	def detect(self, img, mask):
 		heightStep = int((img.shape[0] - 2 * self._buffer) / self._gridDimensions[0])
 		widthStep = int((img.shape[1] - 2 * self._buffer) / self._gridDimensions[1])
@@ -125,7 +123,6 @@ class KeyPointGridDetector(GridDetector):
 		return np.asarray(features)
 
 
-	@profile
 	def detectKeyPoints(self, img, mask):
 		heightStep = int((img.shape[0] - 2 * self._buffer) / self._gridDimensions[0])
 		widthStep = int((img.shape[1] - 2 * self._buffer) / self._gridDimensions[1])

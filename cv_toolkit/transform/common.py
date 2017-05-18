@@ -1,5 +1,7 @@
 import numpy as np
 
+from primitives.track import Track
+
 from .base import Transform
 
 class IdentityTransform(Transform):
@@ -16,3 +18,29 @@ class IdentityTransform(Transform):
 
 	def transformImage(self, img):
 		return img
+
+class PixelCoordinateTransform(Transform):
+	""" Changes coordinates so origin is in the bottom left corner
+
+	"""
+
+	def __init__(self, imgSize):
+		self._imgWidth, self._imgHeight = imgSize
+
+	def transformPoints(self, points):
+		newPoints = [np.array([x, self._imgHeight - y]) for x,y in points]
+
+		return newPoints
+
+	def transformTrack(self, track):
+		points = np.asarray(track.positions)
+		undistorted = [np.array([x, self._imgHeight - y]) for x,y in track.positions]
+
+		newTrack = Track(np.asarray(undistorted), track.times)
+
+		return newTrack
+
+	def transformImage(self, img):
+		newImg = np.flipud(img[:,:,:])
+
+		return newImg

@@ -27,6 +27,10 @@ class GridDetector(Detector):
 
 		self._detector.featureLimit = self._featuresPerCell
 
+	@classmethod
+	def from_grid(cls, detector, grid, featureLimit, borderBuffer=0):
+		return cls(detector, grid.dim, featureLimit, borderBuffer)
+
 	def detect(self, img, mask):
 		heightStep = int((img.shape[0] - 2 * self._buffer) / self._gridDimensions[0])
 		widthStep = int((img.shape[1] - 2 * self._buffer) / self._gridDimensions[1])

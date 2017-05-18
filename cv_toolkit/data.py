@@ -22,14 +22,11 @@ class Dataset(yaml.YAMLObject):
 	yaml_tag = '!Image_Dataset'
 
 	@classmethod
-	def from_file(cls, filename, autoload=True, unwarp=False):
+	def from_file(cls, filename, autoload=True):
 		with open(filename, mode='r') as f:
 			data = yaml.load(f)
 			data.filename = filename
-			data.unwarp = unwarp
-
-			if autoload:
-				data.load()
+			data.load()
 
 			return data
 
@@ -73,21 +70,8 @@ class Dataset(yaml.YAMLObject):
 		# Init frame index to dataset start frame
 		self._currFrameIndex = start
 
-		# Init buffer frame index to start frame
-		self._bufferFrameIndex = start
-
-		# Set image buffering to stopped
-		self._bufferThreadStopped = True
-
-		# Init image buffer
-		#self._imgBuffer = Queue(maxsize=128)
-
-		# Setup buffering thread
-		#self._bufferingThread = Thread(target=self._bufferUpdate, args=())
-		#self._bufferingThread.daemon = True
-
-		# Set whether images should be unwarped
-		self._unwarp = False
+		# Buffered current image
+		self._currFrame = None
 
 	def save(self, filename=None):
 		if (filename is None):
@@ -102,10 +86,11 @@ class Dataset(yaml.YAMLObject):
 		return self._currFrameIndex < self._endFrame
 
 	def read(self):
+		self._currFrame = cv2.imread(self._frames[self._currFrameIndex])
+		timestamp = self.currentTime
 		self._currFrameIndex += 1
-		return cv2.imread(self._frames[self._currFrameIndex-1])
 
-		#return self._imgBuffer.get()
+		return (self._currFrame, timestamp)
 
 	def load(self):
 		""" Load bulky components of dataset
@@ -126,7 +111,10 @@ class Dataset(yaml.YAMLObject):
 
 		# Check if camera file is available
 		if (self._cameraFile is not None and os.path.exists(self._path + self._cameraFile)):
+			# Todo: Handle all camera types or don't load camera object
 			self._camera = FisheyeCamera.from_file(self._path + self._cameraFile)
+		else:
+			print("Error: Cannot load dataset camera calibration")
 
 		# Check if startFrame is beyond dataset bounds
 		if (self._startFrame > len(self._frames)):
@@ -137,36 +125,14 @@ class Dataset(yaml.YAMLObject):
 		if (self._endFrame > len(self._frames)):
 			print("Warning: End frame beyond dataset bounds, setting to end of dataset")
 
-		# Start buffering threads
-		#self._bufferThreadStopped = False
-		#self._bufferingThread.start()
+		# Load first image
+		self._currFrame = cv2.imread(self._frames[self._currFrameIndex])
 
-	"""
-	def _bufferUpdate(self):
-		while True:
-			if (self._bufferThreadStopped):
-				break
+		# Initialize imageSize
+		imgHeight, imgWidth = self._currFrame.shape[:2]
+		self._imgSize = (imgWidth, imgHeight)
 
-			if (not self._imgBuffer.full()):
-				# Load next image into buffer
-				#print("loading img into buffer")
-				img = cv2.imread(self._frames[self._bufferFrameIndex])
 
-				if (self._unwarp and self._camera is not None):
-					img = self._camera.undistortImage(img, cropped=False)
-
-				self._imgBuffer.put(img)
-
-				if (self._bufferFrameIndex >= self._endFrame):
-					# Reached end of dataset, stop buffering
-					self._bufferThreadStopped = True
-				else:
-					self._bufferFrameIndex += 1
-			else:
-				#Do Nothing
-				pass
-				#print("buffer full")
-	"""
 	def construct(self, location, cam, start=0, end=None):
 		# Check if dataset location exists
 		if (not os.path.exists(location)):
@@ -191,15 +157,7 @@ class Dataset(yaml.YAMLObject):
 
 		self._camera = cam
 
-	def currentTime(self):
-		return self._currFrameIndex * self._timestep
-
-
-	def test(self):
-		print(self._name, self._date, self._location)
-		print(self._imgFolder, self._filename, self._path)
-		print(self._startFrame, self._endFrame)
-		print(self._camera)
+		self._imgSize = cam.imgSize
 
 	@classmethod
 	def to_yaml(cls, dumper, data):
@@ -238,9 +196,21 @@ class Dataset(yaml.YAMLObject):
 		self._filename = newFilename
 
 	@property
+	def imgSize(self):
+		return self._imgSize
+
+	@property
+	def currentTime(self):
+		return self._currFrameIndex * self._timestep
+
+	@property
 	def mask(self):
 		return self._mask
 
 	@property
 	def camera(self):
 		return self._camera
+
+	@property
+	def name(self):
+		return self._name

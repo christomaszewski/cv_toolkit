@@ -24,7 +24,7 @@ class FisheyeCamera(yaml.YAMLObject):
 		self._D = np.asarray(D)
 
 		#NOTE!!! Difference from OpenCV
-		# Image Size should be specified as (imgWidth, imgHeigh)
+		# Image Size should be specified as (imgWidth, imgHeight)
 		self._imgSize = tuple(imgSize)
 
 		self._name = name
@@ -117,3 +117,8 @@ class FisheyeCamera(yaml.YAMLObject):
 
 		node = dumper.represent_mapping(cls.yaml_tag, dict_rep)
 		return node
+
+	@property
+	def imgSize(self):
+		# (width, height)
+		return self._imgSize

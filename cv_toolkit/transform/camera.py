@@ -1,4 +1,5 @@
 import numpy as np
+import cv2
 
 from primitives.track import Track
 
@@ -21,3 +22,32 @@ class UndistortionTransform(Transform):
 
 	def transformImage(self, img):
 		return self._camera.undistortImage(img)
+
+class ExtrinsicsTransform(Transform):
+	""" For now this just rotates the frame to fix coordinates for plotting
+
+	"""
+
+	def __init__(self, camera):
+		self._camera = camera
+		width, height = camera.imgSize
+		self._rotation = cv2.getRotationMatrix2D((width/2,height/2),180,1)
+
+
+	def transformPoints(self, points):
+
+
+		return points
+
+	def transformTrack(self, track):
+		points = np.asarray(track.positions)
+		undistorted = [np.dot(self._rotation, np.append(p, [1])) for p in track.positions]
+		newTrack = Track(np.asarray(undistorted), track.times)
+
+		return newTrack
+
+	def transformImage(self, img):
+		rows,cols = img.shape[:2]
+		newImg = cv2.warpAffine(img, self._rotation, (cols,rows))
+		return newImg
+

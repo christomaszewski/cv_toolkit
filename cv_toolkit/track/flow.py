@@ -3,10 +3,10 @@ import cv2
 
 class LKOpticalFlowTracker(object):
 
-	def __init__(self, winSize, maxLevel, criteria, firstImage=None):
+	def __init__(self, firstImage=None, winSize=(15,15), maxLevel=3):
 		self._winSize = winSize
 		self._maxLevel = maxLevel
-		self._criteria = criteria
+		self._criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03)
 
 		self._prevImg = firstImage
 

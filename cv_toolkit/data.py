@@ -5,8 +5,6 @@ import cv2
 import os
 import numpy as np
 
-from threading import Thread
-
 from .cams import FisheyeCamera
 
 class Dataset(yaml.YAMLObject):
@@ -86,6 +84,7 @@ class Dataset(yaml.YAMLObject):
 		return self._currFrameIndex < self._endFrame
 
 	def read(self):
+		del self._currFrame
 		self._currFrame = cv2.imread(self._frames[self._currFrameIndex])
 		timestamp = self.currentTime
 		self._currFrameIndex += 1
@@ -185,6 +184,9 @@ class Dataset(yaml.YAMLObject):
 		params = [dict_rep[x] for x in init_params]
 		return cls(*params)
 
+	@property
+	def progress(self):
+		return 100.0 * ((self._currFrameIndex - self._startFrame)/(self._endFrame - self._startFrame))
 
 	@property
 	def filename(self):

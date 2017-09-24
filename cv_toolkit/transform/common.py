@@ -35,10 +35,15 @@ class PixelCoordinateTransform(Transform):
 	def transformTrack(self, track):
 		points = np.asarray(track.positions)
 		undistorted = [np.array([x, self._imgHeight - y]) for x,y in track.positions]
-
-		newTrack = Track(np.asarray(undistorted), track.times)
-
+		newTrack = Track(np.asarray(undistorted), track.times, track.id)
 		return newTrack
+
+	def transformTracks(self, tracks):
+		for track in tracks:
+			points = np.asarray(track.positions)
+			undistorted = [np.array([x, self._imgHeight - y]) for x,y in track.positions]
+			newTrack = Track(np.asarray(undistorted), track.times, track.id)
+			yield newTrack
 
 	def transformImage(self, img):
 		newImg = np.flipud(img[:,:,:])

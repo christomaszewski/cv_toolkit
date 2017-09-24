@@ -14,7 +14,7 @@ def click_handler(event, x, y, flags, param):
 		drawing = False
 
 	if drawing:
-		cv2.circle(mask, (x, y), size, 255, -1)
+		cv2.circle(mask, (x, y), size, 0, -1)
 		cv2.circle(img, (x, y), size, (0, 0, 255), -1)
 		imgShow = np.copy(img)
 	else:
@@ -22,8 +22,9 @@ def click_handler(event, x, y, flags, param):
 		cv2.circle(imgShow, (x,y), size, (255, 255, 255), -1)
 
 
-mask = np.load('original.npy')
-img = cv2.imread('frame.jpg')
+img = cv2.imread('frame_boat.jpg')
+mask = np.load('mask.npy')
+print(mask)
 
 img[:,:,2] = np.max([img[:,:,2], mask], axis=0)
 np.max

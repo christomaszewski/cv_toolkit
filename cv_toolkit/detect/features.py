@@ -5,7 +5,7 @@ from .base import Detector
 
 class ShiTomasiDetector(Detector):
 
-	def __init__(self, maxCorners=100, qualityLevel=0.9, minDistance=10, blockSize=7):
+	def __init__(self, maxCorners=100, qualityLevel=0.3, minDistance=10., blockSize=10):
 		self._featureLimit = maxCorners
 		self._qualityLevel = qualityLevel
 		self._minDistance = minDistance

@@ -99,6 +99,25 @@ class FisheyeCamera(yaml.YAMLObject):
 
 		return np.squeeze(undistorted).reshape(-1,2)
 
+	def distortPoints(self, points):
+		pInv = np.linalg.inv(self._newK)
+
+		newPoints = []
+		for p in points:
+			newP = np.matmul(pInv,np.lib.pad(p, (0,1), 'constant', constant_values=1).reshape(3,1))
+			newPoints.append(np.squeeze(newP[0:2].reshape(1,2)))
+
+		points = np.asarray(newPoints)
+
+		assert points.ndim == 2 and points.shape[1] == 2
+
+		if points.ndim == 2:
+			points = np.expand_dims(points, 0)
+
+		distorted = cv2.fisheye.distortPoints(points.astype(np.float32), self._K, self._D)
+
+		return np.squeeze(distorted).reshape(-1,2)
+
 	@classmethod
 	def to_yaml(cls, dumper, data):
 		""" Serializes dataset parameters to yaml for output to file

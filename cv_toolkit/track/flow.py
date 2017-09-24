@@ -3,18 +3,20 @@ import cv2
 
 class LKOpticalFlowTracker(object):
 
-	def __init__(self, firstImage=None, winSize=(15,15), maxLevel=3):
+	def __init__(self, winSize=(21,21), maxLevel=5, maxIter=30, epsilon=0.01):
 		self._winSize = winSize
 		self._maxLevel = maxLevel
-		self._criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03)
+		self._criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, maxIter, epsilon)
 
-		self._prevImg = firstImage
+		self._prevImg = None
 
-		self._deviationThreshold = 1
-
+		self._deviationThreshold = 1.
 
 		self._params = dict(winSize = self._winSize, maxLevel = self._maxLevel,
 							criteria = self._criteria)
+
+	def loadImage(self, img):
+		self._prevImg = img
 
 	def trackPoints(self, points, img):
 		if (self._prevImg is None):

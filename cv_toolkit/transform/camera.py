@@ -14,10 +14,26 @@ class UndistortionTransform(Transform):
 	def transformPoints(self, points):
 		return self._camera.undistortPoints(points)
 
+	def inverseTransformPoints(self, points):
+		return self._camera.distortPoints(points)
+
 	def transformTrack(self, track):
 		points = np.asarray(track.positions)
 		undistorted = self._camera.undistortPoints(points)
-		newTrack = Track(np.asarray(undistorted), track.times)
+		newTrack = Track(np.asarray(undistorted), track.times, track.id)
+		return newTrack
+
+	def transformTracks(self, tracks):
+		for track in tracks:
+			points = np.asarray(track.positions)
+			undistorted = self._camera.undistortPoints(points)
+			newTrack = Track(np.asarray(undistorted), track.times, track.id)
+			yield newTrack
+
+	def inverseTransformTrack(self, track):
+		points = np.asarray(track.positions)
+		distorted = self._camera.distortPoints(points)
+		newTrack = Track(np.asarray(distorted), track.times, track.id)
 		return newTrack
 
 	def transformImage(self, img):
@@ -42,7 +58,7 @@ class ExtrinsicsTransform(Transform):
 	def transformTrack(self, track):
 		points = np.asarray(track.positions)
 		undistorted = [np.dot(self._rotation, np.append(p, [1])) for p in track.positions]
-		newTrack = Track(np.asarray(undistorted), track.times)
+		newTrack = Track(np.asarray(undistorted), track.times, track.id)
 
 		return newTrack
 

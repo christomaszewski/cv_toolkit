@@ -28,7 +28,7 @@ class Dataset(yaml.YAMLObject):
 
 			return data
 
-	def __init__(self, name, date, location, folder, start=0, end=0, fps=30, cam=None):
+	def __init__(self, name, date, location, folder, start=0, end=0, fps=30, cam=None, extension='jpg'):
 		# Human Readable Dataset name
 		self._name = name
 
@@ -41,6 +41,7 @@ class Dataset(yaml.YAMLObject):
 		# Last known dataset path and filename
 		self._filename = None
 		self._path = None
+		self._extension = extension
 
 		# Relative path of images on disk
 		self._imgFolder = folder
@@ -106,7 +107,7 @@ class Dataset(yaml.YAMLObject):
 		if (os.path.exists(self._path + self._imgFolder + '/mask.npy')):
 			self._mask = np.load(self._path + self._imgFolder + '/mask.npy')
 
-		self._frames = sorted(glob.glob(self._path + self._imgFolder + '/frame*.jpg'))
+		self._frames = sorted(glob.glob(f"{self._path}{self._imgFolder}/frame*.{self._extension}"))
 
 		# Check if camera file is available
 		if (self._cameraFile is not None and os.path.exists(self._path + self._cameraFile)):
@@ -167,7 +168,7 @@ class Dataset(yaml.YAMLObject):
 		"""
 		dict_rep = {'name':data._name, 'date':data._date, 'location':data._location,
 					'imgFolder':data._imgFolder, 'startFrame':data._startFrame,
-					'endFrame':data._endFrame, 'fps':data._fps, 'camera':data._cameraFile}
+					'endFrame':data._endFrame, 'fps':data._fps, 'camera':data._cameraFile, 'extension':data._extension}
 
 		print(dict_rep)
 
@@ -180,13 +181,17 @@ class Dataset(yaml.YAMLObject):
 		dict_rep = loader.construct_mapping(node)
 		print("Loading from yaml")
 		init_params = ['name', 'date', 'location', 'imgFolder', 
-						'startFrame', 'endFrame', 'fps', 'camera']
+						'startFrame', 'endFrame', 'fps', 'camera', 'extension']
 		params = [dict_rep[x] for x in init_params]
 		return cls(*params)
 
 	@property
 	def progress(self):
 		return 100.0 * ((self._currFrameIndex - self._startFrame)/(self._endFrame - self._startFrame))
+
+	@property
+	def currentFrameIndex(self):
+		return self._currFrameIndex
 
 	@property
 	def filename(self):

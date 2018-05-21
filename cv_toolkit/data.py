@@ -104,15 +104,15 @@ class Dataset(yaml.YAMLObject):
 			return
 
 		# Check if mask file present in image folder
-		if (os.path.exists(self._path + self._imgFolder + '/mask.npy')):
-			self._mask = np.load(self._path + self._imgFolder + '/mask.npy')
+		if (os.path.exists(f"{self._path}{self._imgFolder}/mask.npy")):
+			self._mask = np.load(f"{self._path}{self._imgFolder}/mask.npy")
 
 		self._frames = sorted(glob.glob(f"{self._path}{self._imgFolder}/frame*.{self._extension}"))
 
 		# Check if camera file is available
-		if (self._cameraFile is not None and os.path.exists(self._path + self._cameraFile)):
+		if (self._cameraFile is not None and os.path.exists(f"{self._path}{self._cameraFile}")):
 			# Todo: Handle all camera types or don't load camera object
-			self._camera = FisheyeCamera.from_file(self._path + self._cameraFile)
+			self._camera = FisheyeCamera.from_file(f"{self._path}{self._cameraFile}")
 		else:
 			print("Error: Cannot load dataset camera calibration")
 
@@ -213,6 +213,14 @@ class Dataset(yaml.YAMLObject):
 	@property
 	def mask(self):
 		return self._mask
+
+	@property
+	def cameraFile(self):
+		return self._cameraFile
+
+	@cameraFile.setter
+	def cameraFile(self, newFilename):
+		self._
 
 	@property
 	def camera(self):

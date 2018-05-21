@@ -22,7 +22,7 @@ def click_handler(event, x, y, flags, param):
 		cv2.circle(imgShow, (x,y), size, (255, 255, 255), -1)
 
 
-img = cv2.imread('frame_boat.jpg')
+img = cv2.imread('frame000001.png')
 mask = np.load('mask.npy')
 print(mask)
 

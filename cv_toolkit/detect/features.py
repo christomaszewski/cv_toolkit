@@ -18,6 +18,8 @@ class ShiTomasiDetector(Detector):
 
 		self._detector = cv2.goodFeaturesToTrack
 
+		print(self._featureLimit)
+
 	def detect(self, img, mask=None):
 		# Should store current mask for reuse?
 
@@ -30,6 +32,7 @@ class ShiTomasiDetector(Detector):
 	@featureLimit.setter
 	def featureLimit(self, limit):
 		self._featureLimit = limit
+		self._params['maxCorners'] = limit
 
 
 # still needs to be implemented

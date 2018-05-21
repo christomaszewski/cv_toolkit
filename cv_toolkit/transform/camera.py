@@ -29,7 +29,7 @@ class UndistortionTransform(Transform):
 			undistorted = self._camera.undistortPoints(points)
 			newTrack = Track(np.asarray(undistorted), track.times, track.id)
 			yield newTrack
-
+			
 	def inverseTransformTrack(self, track):
 		points = np.asarray(track.positions)
 		distorted = self._camera.distortPoints(points)
